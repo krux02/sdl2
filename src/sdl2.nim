@@ -3,7 +3,6 @@ import macros
 import unsigned, strutils
 export unsigned, strutils.`%`
 
-
 # Add for people running sdl 2.0.0
 {. deadCodeElim: on .}
 
@@ -36,6 +35,7 @@ type
     WindowEvent_FocusGained, WindowEvent_FocusLost, WindowEvent_Close
 
   EventType* {.size: sizeof(cint).} = enum
+    UndefinedEvent = 0,
     QuitEvent = 0x100, AppTerminating, AppLowMemory, AppWillEnterBackground,
     AppDidEnterBackground, AppWillEnterForeground, AppDidEnterForeground,
     WindowEvent = 0x200, SysWMEvent,
@@ -49,28 +49,30 @@ type
     DollarGesture = 0x800, DollarRecord, MultiGesture,
     ClipboardUpdate = 0x900,
     DropFile = 0x1000,
-    UserEvent = 0x8000, UserEvent1, UserEvent2, UserEvent3, UserEvent4, UserEvent5
+    AudioDeviceAdded = 0x1100, AudioDeviceRemoved,
+    #UserEvent = 0x8000, UserEvent1, UserEvent2, UserEvent3, UserEvent4, UserEvent5
 
-
-  Event* = object
-    kind*: EventType
-    padding: array[56-sizeof(EventType), byte]
-
+type
+  AudioDeviceEventPtr* = ptr AudioDeviceEventObj 
+  AudioDeviceEventObj* {. packed .} = object 
+    timestamp*: uint32
+    which*: uint32       # The audio device index for the ADDED event (valid until next SDL_GetNumAudioDevices() call), SDL_AudioDeviceID for the REMOVED event)
+    iscapture*: uint8    # zero if an output device, non-zero if a capture device.
+    padding1*: uint8
+    padding2*: uint8
+    padding3*: uint8
   QuitEventPtr* = ptr QuitEventObj
-  QuitEventObj* = object
-    kind*: EventType
+  QuitEventObj* {. packed .} = object
     timestamp*: uint32
   WindowEventPtr* = ptr WindowEventObj
-  WindowEventObj* = object
-    kind*: EventType
+  WindowEventObj* {. packed .} = object
     timestamp*: uint32
     windowID*: uint32
     event*: WindowEventID
     pad1,pad2,pad3: uint8
     data1*, data2*: cint
   KeyboardEventPtr* = ptr KeyboardEventObj
-  KeyboardEventObj* = object
-    kind*: EventType
+  KeyboardEventObj* {. packed .} = object
     timestamp*: uint32
     windowID*: uint32
     state*: uint8
@@ -78,28 +80,24 @@ type
     pad1,pad2: byte
     keysym*: KeySym
   TextEditingEventPtr* = ptr TextEditingEventObj
-  TextEditingEventObj* = object
-    kind*: EventType
+  TextEditingEventObj* {. packed .} = object
     timestamp*: uint32
     windowID*: uint32
     text*: array[SDL_TEXTEDITINGEVENT_TEXT_SIZE, char]
     start*,length*: int32
   TextInputEventPtr* = ptr TextInputEventObj
-  TextInputEventObj* = object
-    kind*: EventType
+  TextInputEventObj* {. packed .} = object
     timestamp*: uint32
     windowID*: uint32
     text*: array[SDL_TEXTINPUTEVENT_TEXT_SIZE,char]
   MouseMotionEventPtr* = ptr MouseMotionEventObj
-  MouseMotionEventObj* =  object
-    kind*: EventType
+  MouseMotionEventObj* {. packed .} =  object
     timestamp*,windowID*: uint32
     which*: uint32
     state*: uint32
     x*,y*, xrel*,yrel*: int32
   MouseButtonEventPtr* = ptr MouseButtonEventObj
-  MouseButtonEventObj* = object
-    kind*: EventType
+  MouseButtonEventObj* {. packed .} = object
     timestamp*,windowID*: uint32
     which*: uint32
     button*: uint8
@@ -107,58 +105,49 @@ type
     clicks*,pad2: uint8
     x*,y*: cint
   MouseWheelEventPtr* = ptr MouseWheelEventObj
-  MouseWheelEventObj* = object
-    kind*: EventType
+  MouseWheelEventObj* {. packed .} = object
     timestamp*,windowID*: uint32
     which*: uint32
     x*,y*: cint
   JoyAxisEventPtr* = ptr JoyAxisEventObj
-  JoyAxisEventObj* = object
-    kind*: EventType
+  JoyAxisEventObj* {. packed .} = object
     timestamp*: uint32
     which*: uint8
     axis*: uint8
     pad1,pad2: uint8
     value*: cint
   JoyBallEventPtr* = ptr JoyBallEventObj
-  JoyBallEventObj* = object
-    kind*: EventType
+  JoyBallEventObj* {. packed .} = object
     timestamp*: uint32
     which*,ball*, pad1,pad2: uint8
     xrel*,yrel*: int32
   JoyHatEventPtr* = ptr JoyHatEventObj
-  JoyHatEventObj* = object
-    kind*: EventType
+  JoyHatEventObj* {. packed .} = object
     timestamp*: uint32
     which*: int32
     hat*,value*: uint8
   JoyButtonEventPtr* = ptr JoyButtonEventObj
-  JoyButtonEventObj* = object
-    kind*: EventType
+  JoyButtonEventObj* {. packed .} = object
     timestamp*: uint32
     which*: int32
     button*,state*: uint8
   JoyDeviceEventPtr* = ptr JoyDeviceEventObj
-  JoyDeviceEventObj* = object
-    kind*: EventType
+  JoyDeviceEventObj* {. packed .} = object
     timestamp*: uint32
     which*: int32
   ControllerAxisEventPtr* = ptr ControllerAxisEventObj
-  ControllerAxisEventObj* = object
-    kind*: EventType
+  ControllerAxisEventObj* {. packed .} = object
     timestamp*: uint32
     which*: int32
     axis*, pad1,pad2,pad3: uint8
     value*: int16
   ControllerButtonEventPtr* = ptr ControllerButtonEventObj
-  ControllerButtonEventObj* = object
-    kind*: EventType
+  ControllerButtonEventObj* {. packed .} = object
     timestamp*: uint32
     which*: int32
     button*,state*: uint8
   ControllerDeviceEventPtr* = ptr ControllerDeviceEventObj
-  ControllerDeviceEventObj* = object
-    kind*: EventType
+  ControllerDeviceEventObj* {. packed .} = object
     timestamp*: uint32
     which*: int32
 
@@ -166,15 +155,13 @@ type
   FingerID = int64
 
   TouchFingerEventPtr* = ptr TouchFingerEventObj
-  TouchFingerEventObj* = object
-    kind*: EventType
+  TouchFingerEventObj* {. packed .} = object
     timestamp*: uint32
     touchID*: TouchID
     fingerID*: FingerID
     x*,y*,dx*,dy*,pressure*: cfloat
   MultiGestureEventPtr* = ptr MultiGestureEventObj
-  MultiGestureEventObj* = object
-    kind*: EventType
+  MultiGestureEventObj* {. packed .} = object
     timestamp*: uint32
     touchID*: TouchID
     dTheta*,dDist*,x*,y*: cfloat
@@ -182,21 +169,18 @@ type
 
   GestureID = int64
   DollarGestureEventPtr* = ptr DollarGestureEventObj
-  DollarGestureEventObj* = object
-    kind*: EventType
+  DollarGestureEventObj* {. packed .} = object
     timestamp*: uint32
     touchID*: TouchID
     gestureID*: GestureID
     numFingers*: uint32
     error*, x*, y*: float
   DropEventPtr* = ptr DropEventObj
-  DropEventObj* = object
-    kind*: EventType
+  DropEventObj* {. packed .} = object
     timestamp*: uint32
     file*: cstring
   UserEventPtr* = ptr UserEventObj
-  UserEventObj* = object
-    kind*: EventType
+  UserEventObj* {. packed .} = object
     timestamp*,windowID*: uint32
     code*: int32
     data1*,data2*: pointer
@@ -205,12 +189,64 @@ type
     SDL_ADDEVENT, SDL_PEEKEVENT, SDL_GETEVENT
   EventFilter* = proc (userdata: pointer; event: ptr Event): Bool32 {.cdecl.}
 
+  Event* = object
+    case kind*: EventType
+    of AudioDeviceAdded, AudioDeviceRemoved:
+      adevice*: AudioDeviceEventObj
+    of ControllerAxisMotion:
+      caxis*: ControllerAxisEventObj
+    of ControllerButtonDown, ControllerButtonUp:
+      cbutton*: ControllerButtonEventObj
+    of ControllerDeviceAdded, ControllerDeviceRemoved, ControllerDeviceRemapped:
+      cdevice*: ControllerDeviceEventObj
+    of DollarGesture, DollarRecord:    
+      dgesture*: DollarGestureEventObj 
+    of DropFile:
+      drop*: DropEventObj
+    of FingerMotion, FingerDown, FingerUp:
+      tfinger*: TouchFingerEventObj 
+    of KeyDown, KeyUp:
+      key*: KeyboardEventObj
+    of JoyAxisMotion:
+      jaxis*: JoyAxisEventObj
+    of JoyBallMotion:
+      jball*: JoyBallEventObj
+    of JoyHatMotion:
+      jhat*: JoyHatEventObj
+    of JoyButtonDown, JoyButtonUp:
+      jbutton*: JoyButtonEventObj
+    of JoyDeviceAdded, JoyDeviceRemoved:
+      jdevice*: JoyDeviceEventObj
+    of MouseMotion:
+      motion*: MouseMotionEventObj
+    of MouseButtonDown, MouseButtonUp:
+      button*: MouseButtonEventObj
+    of MouseWheel:
+      wheel*: MouseWheelEventObj
+    of MultiGesture:
+      mgesture*: MultiGestureEventObj
+    of QuitEvent:
+      quit*: QuitEventObj
+    #of SysWMEvent:
+    #  syswm*: SysWMEventObj
+    of TextEditing:
+      edit*: TextEditingEventObj
+    of TextInput:
+      text*: TextInputEventObj
+    #of UserEvent, UserEvent1, UserEvent2, UserEvent3, UserEvent4, UserEvent5: 
+    #  user*: UserEventObj
+    of WindowEvent: 
+      window*: WindowEventObj
+    else:
+      padding: array[56-sizeof(EventType), byte]
 
   SDL_Return* {.size: sizeof(cint).} = enum SdlError = -1, SdlSuccess = 0 ##\
     ## Return value for many SDL functions. Any function that returns like this \
     ## should also be discardable
+
   Bool32* {.size: sizeof(cint).} = enum False32 = 0, True32 = 1 ##\
     ## SDL_bool
+
   KeyState* {.size: sizeof(byte).} = enum KeyReleased = 0, KeyPressed
 
   KeySym* {.pure.} = object
@@ -544,16 +580,16 @@ type
 
   SurfacePtr* = ptr Surface
   Surface* {.pure, final.} = object
-    flags*: uint32          #*< Read-only
+    flags*: uint32           #*< Read-only
     format*: ptr PixelFormat #*< Read-only
-    w*, h*, pitch*: int32   #*< Read-only
-    pixels*: pointer        #*< Read-write
-    userdata*: pointer      #*< Read-write
-    locked*: int32          #*< Read-only   ## see if this should be Bool32
-    lock_data*: pointer     #*< Read-only
-    clip_rect*: Rect       #*< Read-only
-    map: BlitMapPtr           #*< Private
-    refcount*: cint         #*< Read-mostly
+    w*, h*, pitch*: int32    #*< Read-only
+    pixels*: pointer         #*< Read-write
+    userdata*: pointer       #*< Read-write
+    locked*: int32           #*< Read-only   ## TODO see if this should be Bool32
+    lock_data*: pointer      #*< Read-only
+    clip_rect*: Rect         #*< Read-only
+    map: BlitMapPtr          #*< Private
+    refcount*: cint          #*< Read-mostly
 
   BlendMode* {.size: sizeof(cint).} = enum
       BlendMode_None = 0x00000000, #*< No blending
@@ -580,8 +616,6 @@ const  ## These are the currently supported flags for the ::SDL_surface.
 
 template SDL_MUSTLOCK*(some: SurfacePtr): bool = (some.flags and SDL_RLEACCEL) != 0
 
-
-
 const
   INIT_TIMER*       = 0x00000001
   INIT_AUDIO*       = 0x00000010
@@ -602,60 +636,6 @@ const SDL_WINDOWPOS_CENTERED_MASK* = 0x2FFF0000
 template SDL_WINDOWPOS_CENTERED_DISPLAY*(X: cint): expr = (SDL_WINDOWPOS_CENTERED_MASK or X)
 const SDL_WINDOWPOS_CENTERED* = SDL_WINDOWPOS_CENTERED_DISPLAY(0)
 template SDL_WINDOWPOS_ISCENTERED*(X): expr = (((X) and 0xFFFF0000) == SDL_WINDOWPOS_CENTERED_MASK)
-
-
-template evConv(name, name2, ptype: expr; valid: set[EventType]): stmt {.immediate.}=
-  proc `name`* (event: Event): ptype =
-    assert event.kind in valid
-    return cast[ptype](unsafeAddr event)
-  proc `name2`* (event: Event): ptype =
-    assert event.kind in valid
-    return cast[ptype](unsafeAddr event)
-
-
-
-evConv(evWindow, window, WindowEventPtr, {WindowEvent})
-evConv(evKeyboard, key, KeyboardEventPtr, {KeyDown, KeyUP})
-evConv(evTextEditing, edit, TextEditingEventPtr, {TextEditing})
-evConv(evTextInput, text, TextInputEventPtr, {TextInput})
-
-evConv(evMouseMotion, motion, MouseMotionEventPtr, {MouseMotion})
-evConv(evMouseButton, button, MouseButtonEventPtr, {MouseButtonDown, MouseButtonUp})
-evConv(evMouseWheel, wheel, MouseWheelEventPtr, {MouseWheel})
-
-evConv(EvJoyAxis, jaxis, JoyAxisEventPtr, {JoyAxisMotion})
-evConv(EvJoyBall, jball, JoyBallEventPtr, {JoyBallMotion})
-evConv(EvJoyHat, jhat, JoyHatEventPtr, {JoyHatMotion})
-evConv(EvJoyButton, jbutton, JoyButtonEventPtr, {JoyButtonDown, JoyButtonUp})
-evConv(EvJoyDevice, jdevice, JoyDeviceEventPtr, {JoyDeviceAdded, JoyDeviceRemoved})
-
-evConv(EvControllerAxis, caxis, ControllerAxisEventPtr, {ControllerAxisMotion})
-evConv(EvControllerButton, cbutton, ControllerButtonEventPtr, {ControllerButtonDown, ControllerButtonUp})
-evConv(EvControllerDevice, cdevice, ControllerDeviceEventPtr, {ControllerDeviceAdded, ControllerDeviceRemoved})
-
-evConv(EvTouchFinger, tfinger, TouchFingerEventPtr, {FingerMotion, FingerDown, FingerUp})
-evConv(EvMultiGesture, mgesture, MultiGestureEventPtr, {MultiGesture})
-evConv(EvDollarGesture, dgesture, DollarGestureEventPtr, {DollarGesture})
-
-evConv(evDropFile, drop, DropEventPtr, {DropFile})
-evConv(evQuit, quit, QuitEventPtr, {QuitEvent})
-
-evConv(evUser, user, UserEventPtr, {UserEvent, UserEvent1, UserEvent2, UserEvent3, UserEvent4, UserEvent5})
-#evConv(EvSysWM, syswm, SysWMEventPtr, {SysWMEvent})
-
-{.deprecated: [EvWindow: evWindow].}
-{.deprecated: [EvKeyboard: evKeyboard].}
-{.deprecated: [EvTextEditing:evTextEditing].}
-{.deprecated: [EvTextInput: evTextInput].}
-
-{.deprecated: [EvMouseMotion: evMouseMotion].}
-{.deprecated: [EvMouseButton: evMouseButton].}
-{.deprecated: [EvMouseWheel:evMouseWheel].}
-
-{.deprecated: [EvDropFile: evDropFile].}
-{.deprecated: [EvQuit: evQuit].}
-
-{.deprecated: [EvUser: evUser].}
 
 const ## SDL_MessageBox flags. If supported will display warning icon, etc.
   SDL_MESSAGEBOX_ERROR* = 0x00000010 #*< error dialog
