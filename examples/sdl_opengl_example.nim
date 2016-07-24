@@ -6,11 +6,13 @@ import glu
 
 discard sdl2.init(INIT_EVERYTHING)
 
-var screenWidth: cint = 640
-var screenHeight: cint = 480
-
-var window = createWindow("SDL/OpenGL Skeleton", 100, 100, screenWidth, screenHeight, SDL_WINDOW_OPENGL or SDL_WINDOW_RESIZABLE)
-var context = window.glCreateContext()
+var 
+  screenWidth = 640.cint
+  screenHeight = 480.cint
+ 
+let
+  window = createWindow("SDL/OpenGL Skeleton", 100, 100, screenWidth, screenHeight, SDL_WINDOW_OPENGL or SDL_WINDOW_RESIZABLE)
+  context = window.glCreateContext()
 
 # Initialize OpenGL
 loadExtensions()
@@ -21,11 +23,11 @@ glDepthFunc(GL_LEQUAL)                            # Set the type of depth-test
 glShadeModel(GL_SMOOTH)                           # Enable smooth shading
 glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST) # Nice perspective corrections
 
-proc reshape(newWidth: cint, newHeight: cint) =
-  glViewport(0, 0, newWidth, newHeight)   # Set the viewport to cover the new window
+proc reshape() =
+  glViewport(0, 0, screenWidth, screenHeight)   # Set the viewport to cover the new window
   glMatrixMode(GL_PROJECTION)             # To operate on the projection matrix
   glLoadIdentity()                        # Reset
-  gluPerspective(45.0, newWidth / newHeight, 0.1, 100.0)  # Enable perspective projection with fovy, aspect, zNear and zFar
+  gluPerspective(45.0, screenWidth / screenHeight, 0.1, 100.0)  # Enable perspective projection with fovy, aspect, zNear and zFar
 
 proc render() =
   glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT) # Clear color and depth buffers
@@ -108,28 +110,22 @@ proc limitFrameRate() =
     delay(frameTime - now) # Delay to maintain steady frame rate
   frameTime += targetFramePeriod
 
-# Main loop
+var evt: sdl2.Event
 
-var
-  evt = sdl2.defaultEvent
-  runGame = true
+reshape() # Set up initial viewport and projection
 
-reshape(screenWidth, screenHeight) # Set up initial viewport and projection
+block mainLoop:
+  while true:
+    while pollEvent(evt):
+      if evt.kind == QuitEvent:
+        break mainLoop
+      if evt.kind == WindowEvent and evt.window.event == WindowEvent_Resized:
+        screenWidth = evt.window.data1
+        screenHeight = evt.window.data2
+        reshape()
 
-while runGame:
-  while pollEvent(evt):
-    if evt.kind == QuitEvent:
-      runGame = false
-      break
-    if evt.kind == WindowEvent:
-      var windowEvent = cast[WindowEventPtr](addr(evt))
-      if windowEvent.event == WindowEvent_Resized:
-        let newWidth = windowEvent.data1
-        let newHeight = windowEvent.data2
-        reshape(newWidth, newHeight)
+    render()
+    limitFrameRate()
 
-  render()
+window.destroy
 
-  limitFrameRate()
-
-destroy window

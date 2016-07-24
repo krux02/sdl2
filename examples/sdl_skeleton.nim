@@ -1,35 +1,33 @@
 ## Bare-bones SDL2 example
 import sdl2, sdl2/gfx
 
-discard sdl2.init(INIT_EVERYTHING)
+proc main() =
+  discard sdl2.init(INIT_EVERYTHING)
 
-var
-  window: WindowPtr
-  render: RendererPtr
+  let window = createWindow("SDL Skeleton", 100, 100, 640,480, SDL_WINDOW_SHOWN)
+  defer: window.destroy
+  let render = window.createRenderer(-1, Renderer_Accelerated or Renderer_PresentVsync or Renderer_TargetTexture)   
+  defer: render.destroy
 
-window = createWindow("SDL Skeleton", 100, 100, 640,480, SDL_WINDOW_SHOWN)
-render = createRenderer(window, -1, Renderer_Accelerated or Renderer_PresentVsync or Renderer_TargetTexture)
+  var 
+    fpsman: FpsManager
+    evt : sdl2.Event
 
-var
-  evt = sdl2.defaultEvent
-  runGame = true
-  fpsman: FpsManager
-fpsman.init
+  block mainLoop:
+    echo "main loop"
+    while true:
+      while pollEvent(evt):
+        if evt.kind == QuitEvent:
+          break mainLoop
+        if evt.kind == sdl2.KeyDown:
+          if evt.key.keysym.scancode ==  SDL_SCANCODE_ESCAPE:
+            break mainLoop
+        
+      let dt = fpsman.getFramerate / 1000
 
-while runGame:
-  while pollEvent(evt):
-    if evt.kind == QuitEvent:
-      runGame = false
-      break
+      render.setDrawColor 0,0,0,255
+      render.clear
+      render.present
+      fpsman.delay
 
-  let dt = fpsman.getFramerate() / 1000
-
-  render.setDrawColor 0,0,0,255
-  render.clear
-
-  render.present
-  fpsman.delay
-
-destroy render
-destroy window
-
+main()
