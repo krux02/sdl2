@@ -1466,7 +1466,7 @@ proc eventState*(kind: EventType; state: cint): uint8 {.importc: "SDL_EventState
 #   If there aren't enough user-defined events left, this function
 #   returns (uint32)-1
 #
-proc registerEvents*(numevents: cint): uint32 {.importc: "SDL_RegisterEvents".}
+proc registerEvents*(numevents: cint): EventType {.importc: "SDL_RegisterEvents".}
 
 
 proc setError*(fmt: cstring) {.varargs, importc: "SDL_SetError".}
