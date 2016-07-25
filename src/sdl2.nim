@@ -238,7 +238,7 @@ type
     of WindowEvent: 
       window*: WindowEventObj
     else:
-      padding: array[56-sizeof(EventType), byte]
+      user*: UserEventObj
 
   SDL_Return* {.size: sizeof(cint).} = enum SdlError = -1, SdlSuccess = 0 ##\
     ## Return value for many SDL functions. Any function that returns like this \
@@ -1423,7 +1423,7 @@ proc waitEventTimeout*(event: var Event; timeout: cint): Bool32 {.importc: "SDL_
 #   \return 1 on success, 0 if the event was filtered, or -1 if the event queue
 #           was full or there was some other error.
 #
-proc pushEvent*(event: ptr Event): cint {.importc: "SDL_PushEvent".}
+proc pushEvent*(event: ptr Event): cint {.discardable, importc: "SDL_PushEvent".}
 
 #*
 proc setEventFilter*(filter: EventFilter; userdata: pointer) {.importc: "SDL_SetEventFilter".}
