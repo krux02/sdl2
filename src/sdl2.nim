@@ -585,8 +585,8 @@ type
     w*, h*, pitch*: int32    #*< Read-only
     pixels*: pointer         #*< Read-write
     userdata*: pointer       #*< Read-write
-    locked*: int32           #*< Read-only   ## TODO see if this should be Bool32
-    lock_data*: pointer      #*< Read-only
+    locked: int32            #*< Private
+    lock_data: pointer       #*< Private
     clip_rect*: Rect         #*< Read-only
     map: BlitMapPtr          #*< Private
     refcount*: cint          #*< Read-mostly
