@@ -158,13 +158,13 @@ const
 #   Stereo samples are stored in a LRLRLR ordering.
 #
 type
-  AudioCallback* = proc (userdata: pointer; stream: ptr uint8; len: cint) {.cdecl.}
+  AudioCallback* = proc (userdata: pointer; stream: ptr uint8; len: int32) {.cdecl.}
 #*
 #   The calculated values in this structure are calculated by SDL_OpenAudio().
 #
 type
   AudioSpec* = object
-    freq*: cint             #*< DSP frequency -- samples per second
+    freq*: int32             #*< DSP frequency -- samples per second
     format*: AudioFormat #*< Audio data format
     channels*: uint8        #*< Number of channels: 1 mono, 2 stereo
     silence*: uint8         #*< Audio buffer silence value (calculated)
@@ -175,17 +175,17 @@ type
     userdata*: pointer
 
   AudioCVT* {.packed.} = object
-    needed*: cint           #*< Set to 1 if conversion possible
+    needed*: int32           #*< Set to 1 if conversion possible
     src_format*: AudioFormat #*< Source audio format
     dst_format*: AudioFormat #*< Target audio format
     rate_incr*: cdouble     #*< Rate conversion increment
     buf*: ptr uint8         #*< Buffer to hold entire audio data
-    len*: cint              #*< Length of original audio buffer
-    len_cvt*: cint          #*< Length of converted audio buffer
-    len_mult*: cint         #*< buffer must be len*len_mult big
+    len*: int32              #*< Length of original audio buffer
+    len_cvt*: int32          #*< Length of converted audio buffer
+    len_mult*: int32         #*< buffer must be len*len_mult big
     len_ratio*: cdouble     #*< Given len, final size is len*len_ratio
     filters*: array[10, AudioFilter] #*< Filter list
-    filter_index*: cint     #*< Current audio conversion function
+    filter_index*: int32     #*< Current audio conversion function
 
   AudioFilter* = proc (cvt: ptr AudioCVT; format: AudioFormat){.cdecl.}
 
@@ -226,7 +226,7 @@ type
 #
 # @{
 type
-  AudioStatus* {.size: sizeof(cint).} = enum
+  AudioStatus* {.size: sizeof(int32).} = enum
     SDL_AUDIO_STOPPED = 0, SDL_AUDIO_PLAYING, SDL_AUDIO_PAUSED
 const
   SDL_MIX_MAXVOLUME* = 128
@@ -244,9 +244,9 @@ else:
 #   order that they are normally initialized by default.
 #
 # @{
-proc getNumAudioDrivers*(): cint {.
+proc getNumAudioDrivers*(): int32 {.
   importc: "SDL_GetNumAudioDrivers".}
-proc getAudioDriver*(index: cint): cstring {.
+proc getAudioDriver*(index: int32): cstring {.
   importc: "SDL_GetAudioDriver".}
 # @}
 #*
@@ -257,7 +257,7 @@ proc getAudioDriver*(index: cint): cstring {.
 #             use.  You should normally use SDL_Init() or SDL_InitSubSystem().
 #
 # @{
-proc audioInit*(driver_name: cstring): cint {.
+proc audioInit*(driver_name: cstring): int32 {.
   importc: "SDL_AudioInit".}
 proc audioQuit*() {.
   importc: "SDL_AudioQuit".}
@@ -310,7 +310,7 @@ proc getCurrentAudioDriver*(): cstring {.
 #   may modify the requested size of the audio buffer, you should allocate
 #   any local mixing buffers after you open the audio device.
 #
-proc openAudio*(desired: ptr AudioSpec; obtained: ptr AudioSpec): cint {.
+proc openAudio*(desired: ptr AudioSpec; obtained: ptr AudioSpec): int32 {.
   importc: "SDL_OpenAudio".}
 
 #*
@@ -325,7 +325,7 @@ proc openAudio*(desired: ptr AudioSpec; obtained: ptr AudioSpec): cint {.
 #   successfully open the default device (NULL for first argument of
 #   SDL_OpenAudioDevice()).
 #
-proc getNumAudioDevices*(iscapture: cint): cint {.
+proc getNumAudioDevices*(iscapture: int32): int32 {.
   importc: "SDL_GetNumAudioDevices".}
 #*
 #   Get the human-readable name of a specific audio device.
@@ -340,7 +340,7 @@ proc getNumAudioDevices*(iscapture: cint): cint {.
 #   string for any length of time, you should make your own copy of it, as it
 #   will be invalid next time any of several other SDL functions is called.
 #
-proc getAudioDeviceName*(index: cint; iscapture: cint): cstring {.
+proc getAudioDeviceName*(index: int32; iscapture: int32): cstring {.
   importc: "SDL_GetAudioDeviceName".}
 #*
 #   Open a specific audio device. Passing in a device name of NULL requests
@@ -355,9 +355,9 @@ proc getAudioDeviceName*(index: cint; iscapture: cint): cstring {.
 #
 #   SDL_OpenAudio(), unlike this function, always acts on device ID 1.
 #
-proc openAudioDevice*(device: cstring; iscapture: cint;
+proc openAudioDevice*(device: cstring; iscapture: int32;
                       desired: ptr AudioSpec;
-                      obtained: ptr AudioSpec; allowed_changes: cint): AudioDeviceID {.
+                      obtained: ptr AudioSpec; allowed_changes: int32): AudioDeviceID {.
   importc: "SDL_OpenAudioDevice".}
 
 proc getAudioStatus*(): AudioStatus {.
@@ -376,9 +376,9 @@ proc getAudioDeviceStatus*(dev: AudioDeviceID): AudioStatus {.
 #   Silence will be written to the audio device during the pause.
 #
 # @{
-proc pauseAudio*(pause_on: cint) {.
+proc pauseAudio*(pause_on: int32) {.
   importc: "SDL_PauseAudio".}
-proc pauseAudioDevice*(dev: AudioDeviceID; pause_on: cint) {.
+proc pauseAudioDevice*(dev: AudioDeviceID; pause_on: int32) {.
   importc: "SDL_PauseAudioDevice".}
 # @}
 # Pause audio functions
@@ -401,7 +401,7 @@ proc pauseAudioDevice*(dev: AudioDeviceID; pause_on: cint) {.
 #   wave file cannot be opened, uses an unknown data format, or is
 #   corrupt.  Currently raw and MS-ADPCM WAVE files are supported.
 #
-proc loadWAV_RW*(src: ptr RWops; freesrc: cint;
+proc loadWAV_RW*(src: ptr RWops; freesrc: int32;
                  spec: ptr AudioSpec; audio_buf: ptr ptr uint8;
                  audio_len: ptr uint32): ptr AudioSpec {.
   importc: "SDL_LoadWAV_RW".}
@@ -427,9 +427,9 @@ proc freeWAV*(audio_buf: ptr uint8) {.
 #   no conversion needed, or 1 if the audio filter is set up.
 #
 proc buildAudioCVT*(cvt: ptr AudioCVT; src_format: AudioFormat;
-                        src_channels: uint8; src_rate: cint;
+                        src_channels: uint8; src_rate: int32;
                         dst_format: AudioFormat; dst_channels: uint8;
-                        dst_rate: cint): cint {.
+                        dst_rate: int32): int32 {.
   importc: "SDL_BuildAudioCVT".}
 #*
 #   Once you have initialized the \c cvt structure using SDL_BuildAudioCVT(),
@@ -441,7 +441,7 @@ proc buildAudioCVT*(cvt: ptr AudioCVT; src_format: AudioFormat;
 #   \c cvt->buf should be allocated after the \c cvt structure is initialized by
 #   SDL_BuildAudioCVT(), and should be \c cvt->len*cvt->len_mult bytes long.
 #
-proc convertAudio*(cvt: ptr AudioCVT): cint {.
+proc convertAudio*(cvt: ptr AudioCVT): int32 {.
   importc: "SDL_ConvertAudio".}
 
 #*
@@ -451,7 +451,7 @@ proc convertAudio*(cvt: ptr AudioCVT): cint {.
 #   for full audio volume.  Note this does not change hardware volume.
 #   This is provided for convenience -- you can mix your own audio data.
 #
-proc mixAudio*(dst: ptr uint8; src: ptr uint8; len: uint32; volume: cint) {.
+proc mixAudio*(dst: ptr uint8; src: ptr uint8; len: uint32; volume: int32) {.
   importc: "SDL_MixAudio".}
 #*
 #   This works like SDL_MixAudio(), but you specify the audio format instead of
@@ -459,7 +459,7 @@ proc mixAudio*(dst: ptr uint8; src: ptr uint8; len: uint32; volume: cint) {.
 #   device is open at all.
 #
 proc mixAudioFormat*(dst: ptr uint8; src: ptr uint8;
-                         format: AudioFormat; len: uint32; volume: cint) {.
+                         format: AudioFormat; len: uint32; volume: int32) {.
   importc: "SDL_MixAudioFormat".}
 #*
 #   \name Audio lock functions

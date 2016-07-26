@@ -49,7 +49,7 @@ const
 #   byteswapped.  A UNICODE BOM character in a string will override
 #   this setting for the remainder of that string.
 #
-proc ttfByteSwappedUnicode*(swapped: cint) {.importc: "TTF_ByteSwappedUNICODE".}
+proc ttfByteSwappedUnicode*(swapped: int32) {.importc: "TTF_ByteSwappedUNICODE".}
 
 # Initialize the TTF engine - returns 0 if successful, -1 on error
 proc ttfInit*(): SDL_Return  {.importc: "TTF_Init", discardable.}
@@ -57,10 +57,10 @@ proc ttfInit*(): SDL_Return  {.importc: "TTF_Init", discardable.}
 #  Some .fon fonts will have several sizes embedded in the file, so the
 #  point size becomes the index of choosing which size.  If the value
 #  is too high, the last indexed size will be the default.
-proc openFont*(file: cstring; ptsize: cint): FontPtr {.importc: "TTF_OpenFont".}
-proc openFontIndex*(file: cstring; ptsize: cint; index: clong): FontPtr {.importc: "TTF_OpenFontIndex".}
-proc openFontRW*(src: ptr RWops; freesrc: cint; ptsize: cint): FontPtr {.importc: "TTF_OpenFontRW".}
-proc openFontIndexRW*(src: ptr RWops; freesrc: cint; ptsize: cint;
+proc openFont*(file: cstring; ptsize: int32): FontPtr {.importc: "TTF_OpenFont".}
+proc openFontIndex*(file: cstring; ptsize: int32; index: clong): FontPtr {.importc: "TTF_OpenFontIndex".}
+proc openFontRW*(src: ptr RWops; freesrc: int32; ptsize: int32): FontPtr {.importc: "TTF_OpenFontRW".}
+proc openFontIndexRW*(src: ptr RWops; freesrc: int32; ptsize: int32;
                           index: clong): FontPtr {.importc: "TTF_OpenFontIndexRW".}
 # Set and retrieve the font style
 const
@@ -69,10 +69,10 @@ const
   TTF_STYLE_ITALIC* = 0x00000002
   TTF_STYLE_UNDERLINE* = 0x00000004
   TTF_STYLE_STRIKETHROUGH* = 0x00000008
-proc getFontStyle*(font: FontPtr): cint  {.importc: "TTF_GetFontStyle".}
-proc setFontStyle*(font: FontPtr; style: cint) {.importc: "TTF_SetFontStyle".}
-proc getFontOutline*(font: FontPtr): cint {.importc: "TTF_GetFontOutline".}
-proc setFontOutline*(font: FontPtr; outline: cint) {.importc: "TTF_SetFontOutline".}
+proc getFontStyle*(font: FontPtr): int32  {.importc: "TTF_GetFontStyle".}
+proc setFontStyle*(font: FontPtr; style: int32) {.importc: "TTF_SetFontStyle".}
+proc getFontOutline*(font: FontPtr): int32 {.importc: "TTF_GetFontOutline".}
+proc setFontOutline*(font: FontPtr; outline: int32) {.importc: "TTF_SetFontOutline".}
 
 # Set and retrieve FreeType hinter settings
 const
@@ -80,44 +80,44 @@ const
   TTF_HINTING_LIGHT* = 1
   TTF_HINTING_MONO* = 2
   TTF_HINTING_NONE* = 3
-proc getFontHinting*(font: FontPtr): cint {.importc: "TTF_GetFontHinting".}
-proc setFontHinting*(font: FontPtr; hinting: cint) {.importc: "TTF_SetFontHinting".}
+proc getFontHinting*(font: FontPtr): int32 {.importc: "TTF_GetFontHinting".}
+proc setFontHinting*(font: FontPtr; hinting: int32) {.importc: "TTF_SetFontHinting".}
 # Get the total height of the font - usually equal to point size
-proc fontHeight*(font: FontPtr): cint {.importc: "TTF_FontHeight".}
+proc fontHeight*(font: FontPtr): int32 {.importc: "TTF_FontHeight".}
 # Get the offset from the baseline to the top of the font
 #   This is a positive value, relative to the baseline.
 #
-proc fontAscent*(font: FontPtr): cint {.importc: "TTF_FontAscent".}
+proc fontAscent*(font: FontPtr): int32 {.importc: "TTF_FontAscent".}
 # Get the offset from the baseline to the bottom of the font
 #   This is a negative value, relative to the baseline.
 #
-proc fontDescent*(font: FontPtr): cint {.importc: "TTF_FontDescent".}
+proc fontDescent*(font: FontPtr): int32 {.importc: "TTF_FontDescent".}
 # Get the recommended spacing between lines of text for this font
-proc fontLineSkip*(font: FontPtr): cint {.importc: "TTF_FontLineSkip".}
+proc fontLineSkip*(font: FontPtr): int32 {.importc: "TTF_FontLineSkip".}
 # Get/Set whether or not kerning is allowed for this font
-proc getFontKerning*(font: FontPtr): cint {.importc: "TTF_GetFontKerning".}
-proc setFontKerning*(font: FontPtr; allowed: cint) {.importc: "TTF_SetFontKerning".}
+proc getFontKerning*(font: FontPtr): int32 {.importc: "TTF_GetFontKerning".}
+proc setFontKerning*(font: FontPtr; allowed: int32) {.importc: "TTF_SetFontKerning".}
 # Get the number of faces of the font
 proc fontFaces*(font: FontPtr): clong {.importc: "TTF_FontFaces".}
 # Get the font face attributes, if any
-proc fontFaceIsFixedWidth*(font: FontPtr): cint {.importc: "TTF_FontFaceIsFixedWidth".}
+proc fontFaceIsFixedWidth*(font: FontPtr): int32 {.importc: "TTF_FontFaceIsFixedWidth".}
 proc fontFaceFamilyName*(font: FontPtr): cstring {.importc: "TTF_FontFaceFamilyName".}
 proc fontFaceStyleName*(font: FontPtr): cstring {.importc: "TTF_FontFaceStyleName".}
 # Check wether a glyph is provided by the font or not
-proc glyphIsProvided*(font: FontPtr; ch: uint16): cint {.importc: "TTF_GlyphIsProvided".}
+proc glyphIsProvided*(font: FontPtr; ch: uint16): int32 {.importc: "TTF_GlyphIsProvided".}
 # Get the metrics (dimensions) of a glyph
 #   To understand what these metrics mean, here is a useful link:
 #    http://freetype.sourceforge.net/freetype2/docs/tutorial/step2.html
 #
-proc glyphMetrics*(font: FontPtr; ch: uint16; minx: ptr cint;
-                       maxx: ptr cint; miny: ptr cint; maxy: ptr cint;
-                       advance: ptr cint): cint {.importc: "TTF_GlyphMetrics".}
+proc glyphMetrics*(font: FontPtr; ch: uint16; minx: ptr int32;
+                       maxx: ptr int32; miny: ptr int32; maxy: ptr int32;
+                       advance: ptr int32): int32 {.importc: "TTF_GlyphMetrics".}
 # Get the dimensions of a rendered string of text
-proc sizeText*(font: FontPtr; text: cstring; w: ptr cint; h: ptr cint): cint{.
+proc sizeText*(font: FontPtr; text: cstring; w: ptr int32; h: ptr int32): int32{.
   importc: "TTF_SizeText".}
-proc sizeUtf8*(font: FontPtr; text: cstring; w: ptr cint; h: ptr cint): cint{.
+proc sizeUtf8*(font: FontPtr; text: cstring; w: ptr int32; h: ptr int32): int32{.
   importc: "TTF_SizeUTF8".}
-proc sizeUnicode*(font: FontPtr; text: ptr uint16; w, h: ptr cint): cint{.
+proc sizeUnicode*(font: FontPtr; text: ptr uint16; w, h: ptr int32): int32{.
   importc: "TTF_SizeUNICODE".}
 # Create an 8-bit palettized surface and render the given text at
 #   fast quality with the given font and color.  The 0 pixel is the
@@ -196,7 +196,7 @@ proc ttfQuit*() {.importc: "TTF_Quit".}
 # Check if the TTF engine is initialized
 proc ttfWasInit*(): bool {.importc: "TTF_WasInit".}
 # Get the kerning size of two glyphs
-proc getFontKerningSize*(font: FontPtr; prev_index, indx: cint): cint {.
+proc getFontKerningSize*(font: FontPtr; prev_index, indx: int32): int32 {.
   importc: "TTF_GetFontKerningSize".}
 
 {.pop.}

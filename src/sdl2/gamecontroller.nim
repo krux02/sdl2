@@ -46,7 +46,7 @@ type
   GameController* = object
   GameControllerPtr* = ptr GameController
 
-  GameControllerBindType* {.size: sizeof(cint).} = enum
+  GameControllerBindType* {.size: sizeof(int32).} = enum
     SDL_CONTROLLER_BINDTYPE_NONE,
     SDL_CONTROLLER_BINDTYPE_BUTTON,
     SDL_CONTROLLER_BINDTYPE_AXIS,
@@ -60,11 +60,11 @@ type
       of SDL_CONTROLLER_BINDTYPE_NONE:
         nil
       of SDL_CONTROLLER_BINDTYPE_BUTTON:
-        button*: cint
+        button*: int32
       of SDL_CONTROLLER_BINDTYPE_AXIS:
-        axis*: cint
+        axis*: int32
       of SDL_CONTROLLER_BINDTYPE_HAT:
-        hat*, hatMask*: cint
+        hat*, hatMask*: int32
 
 when defined(SDL_Static):
   {.push header: "<SDL2/SDL.h>".}
@@ -102,7 +102,7 @@ else:
 #
 #  \return 1 if mapping is added, 0 if updated, -1 on error
 # /
-proc gameControllerAddMapping* (mappingString: cstring): cint {.
+proc gameControllerAddMapping* (mappingString: cstring): int32 {.
   importc: "SDL_GameControllerAddMapping".}
 
 ##
@@ -124,7 +124,7 @@ proc mapping* (gameController: GameControllerPtr): cstring {.
 ##
 #   Is the joystick on this index supported by the game controller interface?
 # /
-proc isGameController* (joystickIndex: cint): Bool32 {.
+proc isGameController* (joystickIndex: int32): Bool32 {.
   importc: "SDL_IsGameController".}
 
 
@@ -133,7 +133,7 @@ proc isGameController* (joystickIndex: cint): Bool32 {.
 #   This can be called before any controllers are opened.
 #   If no name can be found, this function returns NULL.
 # /
-proc gameControllerNameForIndex* (joystickIndex: cint): cstring {.
+proc gameControllerNameForIndex* (joystickIndex: int32): cstring {.
   importc: "SDL_GameControllerNameForIndex".}
 
 ##
@@ -144,7 +144,7 @@ proc gameControllerNameForIndex* (joystickIndex: cint): cstring {.
 #
 #   \return A controller identifier, or NULL if an error occurred.
 # /
-proc gameControllerOpen* (joystickIndex: cint): GameControllerPtr {.
+proc gameControllerOpen* (joystickIndex: int32): GameControllerPtr {.
   importc: "SDL_GameControllerOpen".}
 
 ##
@@ -175,7 +175,7 @@ proc getJoystick* (gameController: GameControllerPtr): JoystickPtr {.
 #
 #   The state can be one of ::SDL_QUERY, ::SDL_ENABLE or ::SDL_IGNORE.
 # /
-proc gameControllerEventState* (state: cint): cint {.
+proc gameControllerEventState* (state: int32): int32 {.
   importc: "SDL_GameControllerEventState".}
 
 ##
@@ -192,7 +192,7 @@ proc gameControllerUpdate* () {.
 #   The list of axes available from a controller
 # /
 type
-  GameControllerAxis* {.size: sizeof(cint).} = enum
+  GameControllerAxis* {.size: sizeof(int32).} = enum
     SDL_CONTROLLER_AXIS_INVALID = -1,
     SDL_CONTROLLER_AXIS_LEFTX,
     SDL_CONTROLLER_AXIS_LEFTY,
@@ -236,7 +236,7 @@ proc getAxis* (gameController: GameControllerPtr, axis: GameControllerAxis): int
 #   The list of buttons available from a controller
 # /
 type
-  GameControllerButton* {.size: sizeof(cint).} = enum
+  GameControllerButton* {.size: sizeof(int32).} = enum
     SDL_CONTROLLER_BUTTON_INVALID = -1,
     SDL_CONTROLLER_BUTTON_A,
     SDL_CONTROLLER_BUTTON_B,

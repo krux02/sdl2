@@ -44,11 +44,11 @@ const
 
 type
   FpsManager* {.pure, final.} = object
-    framecount*: cint
+    framecount*: int32
     rateticks*: cfloat
-    baseticks*: cint
-    lastticks*: cint
-    rate*: cint
+    baseticks*: int32
+    lastticks*: int32
+    rate*: int32
 
 {.pragma: i, importc, discardable.}
 
@@ -176,31 +176,31 @@ proc filledTrigonRGBA*(renderer: RendererPtr; x1: int16; y1: int16;
                        r,g,b,a: uint8): SDL_Return {.importc, discardable.}
 # Polygon
 proc polygonColor*(renderer: RendererPtr; vx: ptr int16; vy: ptr int16;
-                   n: cint; color: uint32): SDL_Return {.importc, discardable.}
+                   n: int32; color: uint32): SDL_Return {.importc, discardable.}
 proc polygonRGBA*(renderer: RendererPtr; vx: ptr int16; vy: ptr int16;
-                  n: cint; r,g,b,a: uint8): SDL_Return {.importc, discardable.}
+                  n: int32; r,g,b,a: uint8): SDL_Return {.importc, discardable.}
 # AA-Polygon
 proc aaPolygonColor*(renderer: RendererPtr; vx: ptr int16; vy: ptr int16;
-                     n: cint; color: uint32): SDL_Return {.importc: "aapolygonColor",
+                     n: int32; color: uint32): SDL_Return {.importc: "aapolygonColor",
                      discardable.}
 proc aaPolygonRGBA*(renderer: RendererPtr; vx: ptr int16; vy: ptr int16;
-                    n: cint; r,g,b,a: uint8): SDL_Return {.importc: "aapolygonRGBA",
+                    n: int32; r,g,b,a: uint8): SDL_Return {.importc: "aapolygonRGBA",
                     discardable.}
 # Filled Polygon
 proc filledPolygonColor*(renderer: RendererPtr; vx: ptr int16;
-                         vy: ptr int16; n: cint; color: uint32): SDL_Return {.importc, discardable.}
+                         vy: ptr int16; n: int32; color: uint32): SDL_Return {.importc, discardable.}
 proc filledPolygonRGBA*(renderer: RendererPtr; vx: ptr int16;
-                        vy: ptr int16; n: cint; r: uint8; g: uint8; b: uint8;
+                        vy: ptr int16; n: int32; r: uint8; g: uint8; b: uint8;
                         a: uint8): SDL_Return {.importc, discardable.}
 # Textured Polygon
 proc texturedPolygon*(renderer: RendererPtr; vx: ptr int16;
-                      vy: ptr int16; n: cint; texture: SurfacePtr;
-                      texture_dx: cint; texture_dy: cint): SDL_Return {.importc, discardable.}
+                      vy: ptr int16; n: int32; texture: SurfacePtr;
+                      texture_dx: int32; texture_dy: int32): SDL_Return {.importc, discardable.}
 # Bezier
 proc bezierColor*(renderer: RendererPtr; vx,vy: ptr int16;
-                  n: cint; s: cint; color: uint32): SDL_Return {.importc, discardable.}
+                  n: int32; s: int32; color: uint32): SDL_Return {.importc, discardable.}
 proc bezierRGBA*(renderer: RendererPtr; vx, vy: ptr int16;
-                 n: cint; s: cint; r, g, b, a: uint8): SDL_Return {.importc, discardable.}
+                 n: int32; s: int32; r, g, b, a: uint8): SDL_Return {.importc, discardable.}
 # Characters/Strings
 proc gfxPrimitivesSetFont*(fontdata: pointer; cw: uint32; ch: uint32) {.importc.}
 proc gfxPrimitivesSetFontRotation*(rotation: uint32) {.importc.}
@@ -219,32 +219,32 @@ when defined(SDL_Static):
   {.push header: "<SDL2/SDL2_rotozoom.h>".}
 
 proc rotozoomSurface*(src: SurfacePtr; angle, zoom: cdouble;
-  smooth: cint): SurfacePtr {.importc.}
+  smooth: int32): SurfacePtr {.importc.}
 proc rotozoomSurfaceXY*(src: SurfacePtr; angle, zoomX, zoomY: cdouble;
-  smooth: cint): SurfacePtr {.importc.}
-proc rotozoomSurfaceSize*(width, height: cint; angle, zoom: cdouble;
-  dstwidth, dstheight: var cint) {.importc.}
-proc rotozoomSurfaceSizeXY*(width, height: cint; angle, zoomX, zoomY: cdouble;
-                            dstwidth, dstheight: var cint) {.importc.}
+  smooth: int32): SurfacePtr {.importc.}
+proc rotozoomSurfaceSize*(width, height: int32; angle, zoom: cdouble;
+  dstwidth, dstheight: var int32) {.importc.}
+proc rotozoomSurfaceSizeXY*(width, height: int32; angle, zoomX, zoomY: cdouble;
+                            dstwidth, dstheight: var int32) {.importc.}
 proc zoomSurface*(src: SurfacePtr; zoomX, zoomY: cdouble;
-  smooth: cint): SurfacePtr {.importc.}
-proc zoomSurfaceSize*(width, height: cint; zoomX, zoomY: cdouble;
-  dstWidth, dstHeight: var cint) {.importc.}
+  smooth: int32): SurfacePtr {.importc.}
+proc zoomSurfaceSize*(width, height: int32; zoomX, zoomY: cdouble;
+  dstWidth, dstHeight: var int32) {.importc.}
 
-proc shrinkSurface*(src: SurfacePtr; factorx, factorY: cint): SurfacePtr {.importc.}
+proc shrinkSurface*(src: SurfacePtr; factorx, factorY: int32): SurfacePtr {.importc.}
 proc rotateSurface90Degrees*(src: SurfacePtr;
-  numClockwiseTurns: cint): SurfacePtr {.importc.}
+  numClockwiseTurns: int32): SurfacePtr {.importc.}
 
 when defined(SDL_Static):
   {.pop.}
   {.push header: "<SDL2/SDL2_framerate.h>".}
 
 proc init*(manager: var FpsManager) {.importc: "SDL_initFramerate".}
-proc setFramerate*(manager: var FpsManager; rate: cint): SDL_Return {.
+proc setFramerate*(manager: var FpsManager; rate: int32): SDL_Return {.
   importc: "SDL_setFramerate", discardable.}
-proc getFramerate*(manager: var FpsManager): cint {.importc: "SDL_getFramerate".}
-proc getFramecount*(manager: var FpsManager): cint {.importc: "SDL_getFramecount".}
-proc delay*(manager: var FpsManager): cint {.importc: "SDL_framerateDelay", discardable.}
+proc getFramerate*(manager: var FpsManager): int32 {.importc: "SDL_getFramerate".}
+proc getFramecount*(manager: var FpsManager): int32 {.importc: "SDL_getFramecount".}
+proc delay*(manager: var FpsManager): int32 {.importc: "SDL_framerateDelay", discardable.}
 
 {.pop.}
 
